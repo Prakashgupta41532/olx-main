@@ -1,0 +1,68 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --brand-50: #f0f7ff;
+    --brand-100: #e0f0ff;
+    --brand-200: #b9e2ff;
+    --brand-300: #7cccff;
+    --brand-400: #36b3ff;
+    --brand-500: #0099ff;
+    --brand-600: #007acc;
+    --brand-700: #0066b3;
+    --brand-800: #004d99;
+    --brand-900: #003d80;
+    --brand-950: #002952;
+  }
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Custom utilities */
+.text-shadow {
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.bg-gradient-brand {
+  background: linear-gradient(135deg, var(--brand-600) 0%, var(--brand-800) 100%);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px rgba(0, 153, 255, 0.3);
+}
+
+/* Mobile optimizations */
+@media (max-width: 640px) {
+  .mobile-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: white;
+    padding: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+  }
+}
