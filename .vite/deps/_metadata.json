@@ -1,0 +1,91 @@
+{
+  "hash": "16a8d868",
+  "configHash": "42909cee",
+  "lockfileHash": "1f435b9a",
+  "browserHash": "8e97b65c",
+  "optimized": {
+    "react/jsx-dev-runtime": {
+      "src": "../../node_modules/react/jsx-dev-runtime.js",
+      "file": "react_jsx-dev-runtime.js",
+      "fileHash": "cb842ffc",
+      "needsInterop": true
+    },
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "60a3b70f",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "e72dbc28",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.js",
+      "file": "react-router-dom.js",
+      "fileHash": "4e7f99c2",
+      "needsInterop": false
+    },
+    "react-hot-toast": {
+      "src": "../../node_modules/react-hot-toast/dist/index.mjs",
+      "file": "react-hot-toast.js",
+      "fileHash": "2774afd8",
+      "needsInterop": false
+    },
+    "@tanstack/react-query": {
+      "src": "../../node_modules/@tanstack/react-query/build/modern/index.js",
+      "file": "@tanstack_react-query.js",
+      "fileHash": "5c8b30ff",
+      "needsInterop": false
+    },
+    "lucide-react": {
+      "src": "../../node_modules/lucide-react/dist/esm/lucide-react.js",
+      "file": "lucide-react.js",
+      "fileHash": "7d2dca53",
+      "needsInterop": false
+    },
+    "framer-motion": {
+      "src": "../../node_modules/framer-motion/dist/es/index.mjs",
+      "file": "framer-motion.js",
+      "fileHash": "0cfbc508",
+      "needsInterop": false
+    },
+    "react-slider": {
+      "src": "../../node_modules/react-slider/dist/es/dev/index.mjs",
+      "file": "react-slider.js",
+      "fileHash": "14c1198f",
+      "needsInterop": false
+    },
+    "@supabase/supabase-js": {
+      "src": "../../node_modules/@supabase/supabase-js/dist/module/index.js",
+      "file": "@supabase_supabase-js.js",
+      "fileHash": "da8480b0",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "browser-OEGO7DCU": {
+      "file": "browser-OEGO7DCU.js"
+    },
+    "chunk-LIEENW5U": {
+      "file": "chunk-LIEENW5U.js"
+    },
+    "browser-3SPZPU3K": {
+      "file": "browser-3SPZPU3K.js"
+    },
+    "chunk-5L737GQX": {
+      "file": "chunk-5L737GQX.js"
+    },
+    "chunk-T4NT7ECI": {
+      "file": "chunk-T4NT7ECI.js"
+    },
+    "chunk-BYIBYIM7": {
+      "file": "chunk-BYIBYIM7.js"
+    },
+    "chunk-HXA6O6EE": {
+      "file": "chunk-HXA6O6EE.js"
+    }
+  }
+}

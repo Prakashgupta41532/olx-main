@@ -1,13 +1,17 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Star, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle } from 'lucide-react';
 import ReactSlider from 'react-slider';
+import { getProductListings, ProductListing, updateProductListing } from '../lib/api/productListings';
 
 const Listings = () => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [distance, setDistance] = useState(25);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
   const [sortBy, setSortBy] = useState('Newest First');
+  const [listings, setListings] = useState<ProductListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const categories = [
     'All Categories',
@@ -29,96 +33,60 @@ const Listings = () => {
     'Distance'
   ];
 
-  const sampleListings = [
-    {
-      id: 1,
-      title: '2022 MacBook Pro M2',
-      price: 1899,
-      location: 'Toronto, ON',
-      distance: '2.3 km',
-      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca4?auto=format&fit=crop&q=80&w=500',
-      condition: 'Like New',
-      posted: '2 hours ago',
-      verified: true
-    },
-    {
-      id: 2,
-      title: 'Canon EOS R5 Camera',
-      price: 3499,
-      location: 'Vancouver, BC',
-      distance: '1.5 km',
-      image: 'https://images.unsplash.com/photo-1621520291095-aa6c7137f578?auto=format&fit=crop&q=80&w=500',
-      condition: 'Excellent',
-      posted: '5 hours ago',
-      verified: true
-    },
-    {
-      id: 3,
-      title: 'Canada Goose Parka',
-      price: 599,
-      location: 'Montreal, QC',
-      distance: '3.1 km',
-      image: 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?auto=format&fit=crop&q=80&w=500',
-      condition: 'Good',
-      posted: '1 day ago',
-      verified: false
-    },
-    {
-      id: 4,
-      title: 'iPhone 15 Pro Max',
-      price: 1299,
-      location: 'Calgary, AB',
-      distance: '0.8 km',
-      image: 'https://images.unsplash.com/photo-1695048133142-1a20484d2569?auto=format&fit=crop&q=80&w=500',
-      condition: 'Like New',
-      posted: '3 hours ago',
-      verified: true
-    },
-    {
-      id: 5,
-      title: 'Peloton Bike+',
-      price: 1899,
-      location: 'Ottawa, ON',
-      distance: '4.2 km',
-      image: 'https://images.unsplash.com/photo-1591291621164-2c6367723315?auto=format&fit=crop&q=80&w=500',
-      condition: 'Excellent',
-      posted: '6 hours ago',
-      verified: true
-    },
-    {
-      id: 6,
-      title: 'PS5 Bundle with Games',
-      price: 549,
-      location: 'Edmonton, AB',
-      distance: '1.7 km',
-      image: 'https://images.unsplash.com/photo-1606813907291-d86efa9b94db?auto=format&fit=crop&q=80&w=500',
-      condition: 'Good',
-      posted: '4 hours ago',
-      verified: false
-    },
-    {
-      id: 7,
-      title: 'DJI Mavic 3 Pro Drone',
-      price: 2299,
-      location: 'Winnipeg, MB',
-      distance: '2.9 km',
-      image: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&q=80&w=500',
-      condition: 'Like New',
-      posted: '2 days ago',
-      verified: true
-    },
-    {
-      id: 8,
-      title: 'Ski Equipment Set',
-      price: 799,
-      location: 'Quebec City, QC',
-      distance: '5.3 km',
-      image: 'https://images.unsplash.com/photo-1605540436563-5bca919ae766?auto=format&fit=crop&q=80&w=500',
-      condition: 'Good',
-      posted: '1 day ago',
-      verified: false
-    }
-  ];
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        setLoading(true);
+        
+        // Convert UI sort options to API sort options
+        let apiSortBy;
+        switch (sortBy) {
+          case 'Price: Low to High':
+            apiSortBy = 'price_low_to_high';
+            break;
+          case 'Price: High to Low':
+            apiSortBy = 'price_high_to_low';
+            break;
+          case 'Newest First':
+            apiSortBy = 'newest_first';
+            break;
+          default:
+            apiSortBy = 'newest_first';
+        }
+
+        // Convert UI category to API category (slug format)
+        let apiCategory;
+        if (selectedCategory !== 'All Categories') {
+          apiCategory = selectedCategory.toLowerCase().replace(/ /g, '-');
+        }
+
+        const data = await getProductListings({
+          category: apiCategory,
+          price_min: priceRange[0],
+          price_max: priceRange[1],
+          sort_by: apiSortBy
+        });
+        
+        setListings(data);
+        setError(null);
+      } catch (err) {
+        console.error('Error fetching listings:', err);
+        setError('Failed to load listings. Please try again later.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchListings();
+  }, [selectedCategory, sortBy, priceRange]);
+  useEffect(() => {
+    const updateImage = async () => {
+      await updateProductListing('450d5599-dea4-410c-9e08-51f7a611a2b6', {
+        image: 'https://images.unsplash.com/photo-1495707902641-75cac588d2e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+      });
+    };
+    updateImage();
+  }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 py-6">
@@ -218,54 +186,76 @@ const Listings = () => {
           </div>
         </div>
 
-        {/* Listings Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {sampleListings.map((listing) => (
-            <motion.div
-              key={listing.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              className="bg-white rounded-2xl shadow-soft overflow-hidden hover:shadow-lg transition-shadow"
-            >
-              <div className="relative">
-                <img
-                  src={listing.image}
-                  alt={listing.title}
-                  className="w-full h-48 object-cover"
-                />
-                <div className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-sm font-medium text-primary-600">
-                  {listing.condition}
-                </div>
-              </div>
-              <div className="p-4">
-                <div className="flex items-start justify-between">
-                  <h3 className="text-lg font-medium text-gray-900 line-clamp-2">
-                    {listing.title}
+        {/* Listings Section */}
+        <div className="mt-6">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Browse Listings</h2>
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+              {error}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {listings.map((listing) => (
+                <motion.div
+                  key={listing.id}
+                  className="bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-medium transition-shadow duration-300"
+                  whileHover={{ y: -5 }}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="relative h-48">
+                    <img
+                      src={listing.image || 'https://via.placeholder.com/500x300?text=No+Image'}
+                      alt={listing.title}
+                      className="w-full h-full object-cover"
+                    />
                     {listing.verified && (
-                      <CheckCircle className="inline-block h-4 w-4 text-primary-600 ml-1" />
+                      <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-lg text-xs font-medium flex items-center">
+                        <CheckCircle className="h-3 w-3 mr-1" />
+                        Verified
+                      </div>
                     )}
-                  </h3>
-                  <p className="text-lg font-bold text-primary-600 ml-2 whitespace-nowrap">
-                    CA${listing.price}
-                  </p>
-                </div>
-                <div className="mt-2 space-y-1">
-                  <div className="flex items-center text-sm text-gray-500">
-                    <MapPin className="h-4 w-4 mr-1" />
-                    {listing.location} • {listing.distance}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500">
-                    <Clock className="h-4 w-4 mr-1" />
-                    {listing.posted}
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{listing.title}</h3>
+                      <div className="bg-primary-50 text-primary-700 px-2 py-1 rounded-lg text-sm font-medium">
+                        CA${listing.price}
+                      </div>
+                    </div>
+                    <div className="flex items-center text-gray-500 text-sm mb-2">
+                      <MapPin className="h-4 w-4 mr-1" />
+                      <span>{listing.location}</span>
+                      <span className="mx-1">•</span>
+                      <span>{listing.distance}</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-3">
+                      <div className="flex items-center text-gray-500 text-sm">
+                        <Tag className="h-4 w-4 mr-1" />
+                        <span>{listing.condition}</span>
+                      </div>
+                      <div className="flex items-center text-gray-500 text-sm">
+                        <Clock className="h-4 w-4 mr-1" />
+                        <span>{listing.posted}</span>
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <button className="mt-3 w-full py-2 bg-gradient-primary text-white text-sm font-medium rounded-xl hover:shadow-glow transition-all">
-                  View Details
-                </button>
-              </div>
-            </motion.div>
-          ))}
+                </motion.div>
+              ))}
+            </div>
+          )}
+          
+          {!loading && !error && listings.length === 0 && (
+            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
+              No listings found matching your criteria. Try adjusting your filters.
+            </div>
+          )}
         </div>
       </div>
     </div>
