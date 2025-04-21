@@ -1,8 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Star, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle } from 'lucide-react';
 import ReactSlider from 'react-slider';
-import { getProductListings, ProductListing, updateProductListing } from '../lib/api/productListings';
+import { getProductListings, ProductListing, 
+  // updateProductListing
+ } from '../lib/api/productListings';
 
 const Listings = () => {
   const [priceRange, setPriceRange] = useState([0, 5000]);
@@ -79,14 +81,14 @@ const Listings = () => {
 
     fetchListings();
   }, [selectedCategory, sortBy, priceRange]);
-  useEffect(() => {
-    const updateImage = async () => {
-      await updateProductListing('450d5599-dea4-410c-9e08-51f7a611a2b6', {
-        image: 'https://images.unsplash.com/photo-1495707902641-75cac588d2e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-      });
-    };
-    updateImage();
-  }, []);
+  // useEffect(() => {
+  //   const updateImage = async () => {
+  //     await updateProductListing('450d5599-dea4-410c-9e08-51f7a611a2b6', {
+  //       image: 'https://images.unsplash.com/photo-1495707902641-75cac588d2e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+  //     });
+  //   };
+  //   updateImage();
+  // }, []);
 
   return (
     <div className="min-h-screen bg-gray-50 py-6">
