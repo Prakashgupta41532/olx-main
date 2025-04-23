@@ -25,6 +25,8 @@ export const getProductListings = async (filters?: {
   condition?: string;
   sort_by?: string;
   verified?: boolean;
+  search?: string;
+  max_distance?: number;
 }) => {
   let query = supabase.from('product_listings').select('*');
 
@@ -60,6 +62,21 @@ export const getProductListings = async (filters?: {
     query = query.eq('verified', filters.verified);
   }
 
+  // Add search functionality
+  if (filters?.search) {
+    // Search in title and description
+    query = query.or(`title.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+  }
+
+  // Add distance filtering if supported by your database
+  // Note: This is a placeholder. Actual implementation depends on your database structure
+  // and whether you're using PostGIS or another spatial extension
+  if (filters?.max_distance !== undefined) {
+    // In a real implementation, you would use the user's current location
+    // and calculate the distance to each listing
+    // For now, we'll assume there's a distance column or we'll handle it client-side
+  }
+
   if (filters?.sort_by) {
     switch (filters.sort_by) {
       case 'price_low_to_high':
@@ -69,6 +86,16 @@ export const getProductListings = async (filters?: {
         query = query.order('price', { ascending: false });
         break;
       case 'newest_first':
+        query = query.order('created_at', { ascending: false });
+        break;
+      case 'popular':
+        // Assuming there's a popularity or views column
+        // If not, fall back to newest
+        query = query.order('created_at', { ascending: false });
+        break;
+      case 'distance':
+        // If distance sorting is supported by your database
+        // For now, we'll handle this client-side
         query = query.order('created_at', { ascending: false });
         break;
       default:

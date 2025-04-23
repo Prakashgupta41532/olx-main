@@ -14,6 +14,8 @@ const Listings = () => {
   const [listings, setListings] = useState<ProductListing[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filtersVisible, setFiltersVisible] = useState(false);
 
   const categories = [
     'All Categories',
@@ -52,6 +54,12 @@ const Listings = () => {
           case 'Newest First':
             apiSortBy = 'newest_first';
             break;
+          case 'Distance':
+            apiSortBy = 'distance';
+            break;
+          case 'Most Popular':
+            apiSortBy = 'popular';
+            break;
           default:
             apiSortBy = 'newest_first';
         }
@@ -66,10 +74,30 @@ const Listings = () => {
           category: apiCategory,
           price_min: priceRange[0],
           price_max: priceRange[1],
-          sort_by: apiSortBy
+          sort_by: apiSortBy,
+          search: searchQuery.trim() !== '' ? searchQuery : undefined,
+          max_distance: distance
         });
         
-        setListings(data);
+        // Process the data
+        let processedData = [...data];
+        
+        // If we're sorting by distance but the API doesn't support it,
+        // we can do client-side sorting
+        if (sortBy === 'Distance' && apiSortBy !== 'distance') {
+          // This is a simplified example. In a real app, you would use
+          // geolocation to calculate actual distances
+          processedData.sort((a, b) => {
+            const distA = a.distance ? parseFloat(a.distance) : 999;
+            const distB = b.distance ? parseFloat(b.distance) : 999;
+            return distA - distB;
+          });
+        }
+        
+        // Apply all filters using the filterListings function
+        processedData = filterListings(processedData);
+        
+        setListings(processedData);
         setError(null);
       } catch (err) {
         console.error('Error fetching listings:', err);
@@ -79,16 +107,51 @@ const Listings = () => {
       }
     };
 
-    fetchListings();
-  }, [selectedCategory, sortBy, priceRange]);
-  // useEffect(() => {
-  //   const updateImage = async () => {
-  //     await updateProductListing('450d5599-dea4-410c-9e08-51f7a611a2b6', {
-  //       image: 'https://images.unsplash.com/photo-1495707902641-75cac588d2e9?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
-  //     });
-  //   };
-  //   updateImage();
-  // }, []);
+    // Add a small delay to prevent too many API calls while typing
+    const timeoutId = setTimeout(() => {
+      fetchListings();
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [selectedCategory, sortBy, priceRange, searchQuery, distance]);
+
+  // Filter function for client-side filtering
+  const filterListings = (listings: ProductListing[]) => {
+    return listings.filter(listing => {
+      // Price filter
+      if (listing.price < priceRange[0] || listing.price > priceRange[1]) {
+        return false;
+      }
+      
+      // Distance filter (if available)
+      if (listing.distance && parseFloat(listing.distance) > distance) {
+        return false;
+      }
+      
+      // Category filter
+      if (selectedCategory !== 'All Categories') {
+        const categorySlug = selectedCategory.toLowerCase().replace(/ /g, '-');
+        if (listing.category_id !== categorySlug) {
+          return false;
+        }
+      }
+      
+      // Search query filter
+      if (searchQuery && !listing.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+        return false;
+      }
+      
+      return true;
+    });
+  };
+
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const toggleFilters = () => {
+    setFiltersVisible(!filtersVisible);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 py-6">
@@ -103,6 +166,8 @@ const Listings = () => {
                   type="text"
                   placeholder="Search listings..."
                   className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+                  value={searchQuery}
+                  onChange={handleSearchInputChange}
                 />
               </div>
             </div>
@@ -140,13 +205,14 @@ const Listings = () => {
 
               <button
                 className="bg-primary-50 text-primary-600 p-2 rounded-xl hover:bg-primary-100 transition-colors"
-                onClick={() => {}}
+                onClick={toggleFilters}
               >
                 <SlidersHorizontal className="h-5 w-5" />
               </button>
             </div>
           </div>
 
+          {/* Advanced filters - toggle visibility */}
           <div className="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -200,25 +266,32 @@ const Listings = () => {
             <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
               {error}
             </div>
+          ) : listings.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-soft p-8 text-center">
+              <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                <Search className="h-8 w-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-1">No listings found</h3>
+              <p className="text-gray-500">Try adjusting your filters or search query</p>
+            </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {listings.map((listing) => (
                 <motion.div
                   key={listing.id}
-                  className="bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-medium transition-shadow duration-300"
-                  whileHover={{ y: -5 }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.3 }}
+                  className="bg-white rounded-xl shadow-soft overflow-hidden hover:shadow-medium transition-shadow"
                 >
-                  <div className="relative h-48">
+                  <div className="relative pb-[75%]">
                     <img
-                      src={listing.image || 'https://via.placeholder.com/500x300?text=No+Image'}
+                      src={listing.image || 'https://via.placeholder.com/300x225'}
                       alt={listing.title}
-                      className="w-full h-full object-cover"
+                      className="absolute inset-0 w-full h-full object-cover"
                     />
                     {listing.verified && (
-                      <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-lg text-xs font-medium flex items-center">
+                      <div className="absolute top-2 right-2 bg-primary-500 text-white text-xs font-medium px-2 py-1 rounded-full flex items-center">
                         <CheckCircle className="h-3 w-3 mr-1" />
                         Verified
                       </div>
@@ -226,36 +299,36 @@ const Listings = () => {
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-lg font-semibold text-gray-900 line-clamp-1">{listing.title}</h3>
-                      <div className="bg-primary-50 text-primary-700 px-2 py-1 rounded-lg text-sm font-medium">
-                        CA${listing.price}
-                      </div>
+                      <h3 className="text-lg font-medium text-gray-900 line-clamp-2">{listing.title}</h3>
+                      <span className="font-bold text-primary-600">CA${listing.price}</span>
                     </div>
-                    <div className="flex items-center text-gray-500 text-sm mb-2">
+                    <div className="flex items-center text-sm text-gray-500 mb-3">
                       <MapPin className="h-4 w-4 mr-1" />
                       <span>{listing.location}</span>
-                      <span className="mx-1">•</span>
-                      <span>{listing.distance}</span>
+                      {listing.distance && (
+                        <span className="ml-2">({listing.distance} km)</span>
+                      )}
                     </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center text-gray-500 text-sm">
-                        <Tag className="h-4 w-4 mr-1" />
-                        <span>{listing.condition}</span>
-                      </div>
-                      <div className="flex items-center text-gray-500 text-sm">
-                        <Clock className="h-4 w-4 mr-1" />
-                        <span>{listing.posted}</span>
-                      </div>
+                    <div className="flex flex-wrap gap-2 mb-3">
+                      {listing.condition && (
+                        <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          <Tag className="h-3 w-3 mr-1" />
+                          {listing.condition}
+                        </span>
+                      )}
+                      {listing.posted && (
+                        <span className="bg-gray-100 text-gray-800 text-xs px-2 py-1 rounded-full flex items-center">
+                          <Clock className="h-3 w-3 mr-1" />
+                          {listing.posted}
+                        </span>
+                      )}
                     </div>
+                    <button className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                      View Details
+                    </button>
                   </div>
                 </motion.div>
               ))}
-            </div>
-          )}
-          
-          {!loading && !error && listings.length === 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 text-yellow-700 px-4 py-3 rounded-lg">
-              No listings found matching your criteria. Try adjusting your filters.
             </div>
           )}
         </div>

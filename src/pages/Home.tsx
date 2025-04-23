@@ -1,99 +1,28 @@
-import React from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, ArrowRight, MapPin, Star, Tag, Clock } from 'lucide-react';
+import { ArrowRight, MapPin, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { getProductListings, ProductListing } from '../lib/api/productListings';
 
 const Home = () => {
-  const featuredListings = [
-    {
-      id: 1,
-      title: 'iPhone 15 Pro Max - 256GB',
-      price: 1299,
-      location: 'Toronto, ON',
-      image: 'https://images.unsplash.com/photo-1591337676887-a217a6970a8a?auto=format&fit=crop&q=80&w=400',
-      rating: 4.8,
-      reviews: 24,
-      condition: 'Like New',
-      posted: '2 hours ago'
-    },
-    {
-      id: 2,
-      title: 'MacBook Pro M3 Max - 2024',
-      price: 3499,
-      location: 'Vancouver, BC',
-      image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca4?auto=format&fit=crop&q=80&w=400',
-      rating: 4.9,
-      reviews: 16,
-      condition: 'Excellent',
-      posted: '3 hours ago'
-    },
-    {
-      id: 3,
-      title: 'PS5 Slim with Extra Controller',
-      price: 499,
-      location: 'Montreal, QC',
-      image: 'https://images.unsplash.com/photo-1606144042614-b2417e99c4e3?auto=format&fit=crop&q=80&w=400',
-      rating: 4.7,
-      reviews: 31,
-      condition: 'Good',
-      posted: '5 hours ago'
-    },
-    {
-      id: 4,
-      title: 'iPad Pro 12.9" M2 (2023)',
-      price: 1199,
-      location: 'Calgary, AB',
-      image: 'https://images.unsplash.com/photo-1544244015-0df4b3ffc6b0?auto=format&fit=crop&q=80&w=400',
-      rating: 5.0,
-      reviews: 12,
-      condition: 'Like New',
-      posted: '1 day ago'
-    },
-    {
-      id: 5,
-      title: 'Nintendo Switch OLED - White',
-      price: 349,
-      location: 'Ottawa, ON',
-      image: 'https://images.unsplash.com/photo-1578303512597-81e6cc155b3e?auto=format&fit=crop&q=80&w=400',
-      rating: 4.6,
-      reviews: 28,
-      condition: 'Good',
-      posted: '2 days ago'
-    },
-    {
-      id: 6,
-      title: 'AirPods Pro (2nd Gen)',
-      price: 279,
-      location: 'Edmonton, AB',
-      image: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?auto=format&fit=crop&q=80&w=400',
-      rating: 4.9,
-      reviews: 19,
-      condition: 'Like New',
-      posted: '1 week ago'
-    },
-    {
-      id: 7,
-      title: 'Canon EOS R5 with RF 24-70mm',
-      price: 4299,
-      location: 'Victoria, BC',
-      image: 'https://images.unsplash.com/photo-1621520291095-aa6c7137f578?auto=format&fit=crop&q=80&w=400',
-      rating: 4.8,
-      reviews: 15,
-      condition: 'Excellent',
-      posted: '3 days ago'
-    },
-    {
-      id: 8,
-      title: 'DJI Mavic 3 Pro Drone',
-      price: 2199,
-      location: 'Quebec City, QC',
-      image: 'https://images.unsplash.com/photo-1473968512647-3e447244af8f?auto=format&fit=crop&q=80&w=400',
-      rating: 4.7,
-      reviews: 23,
-      condition: 'Like New',
-      posted: '4 days ago'
-    }
-  ];
+  const [featuredListings, setFeaturedListings] = useState<ProductListing[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchListings = async () => {
+      try {
+        const data = await getProductListings();
+        setFeaturedListings(data.slice(0, 10));
+        setError(null);
+      } catch (e) {
+        setError(`Failed to load featured listings. ${e}`);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchListings();
+  }, []);
 
   const todaysDeals = [
     {
@@ -173,7 +102,14 @@ const Home = () => {
         </div>
 
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-          {featuredListings.map((listing) => (
+          {loading ? (
+            <div className="col-span-full text-center py-8 text-gray-500">Loading...</div>
+          ) : error ? (
+            <div className="col-span-full text-center py-8 text-red-500">{error}</div>
+          ) : featuredListings.length === 0 ? (
+            <div className="col-span-full text-center py-8 text-gray-500">No featured listings found.</div>
+          ) : 
+            featuredListings.map((listing) => (
             <motion.div
               key={listing.id}
               initial={{ opacity: 0, y: 20 }}
