@@ -1,31 +1,39 @@
-import React, { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { 
-  Menu, Search, MessageCircle, User, LogOut, MapPin, ChevronDown, Bell, X,
+  Menu, Search, MessageCircle, User, ChevronDown, Bell, X,
   Car, Home, Smartphone, Briefcase, Bike, Tv, Truck, Sofa, Shirt, Book, Dog,
-  ShoppingBag, Plus, Store
+  Plus, Store
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Header = () => {
   const { user, signOut } = useAuth();
-  const location = useLocation();
-  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
-  const [selectedLocation, setSelectedLocation] = useState('Toronto, ON');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
-
-  const locations = [
-    'Toronto, ON',
-    'Vancouver, BC',
-    'Montreal, QC',
-    'Calgary, AB',
-    'Ottawa, ON',
-    'Edmonton, AB',
-    'Winnipeg, MB',
-    'Quebec City, QC'
-  ];
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
+  const profileButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Handle clicks outside the profile menu to close it
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current && 
+        profileButtonRef.current && 
+        !profileMenuRef.current.contains(event.target as Node) &&
+        !profileButtonRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false);
+      }
+    };
+    
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const categories = [
     { name: 'Cars', icon: Car, path: '/category/cars' },
@@ -128,12 +136,27 @@ const Header = () => {
                   <Link to="/notifications" className="hidden sm:block">
                     <Bell className="h-6 w-6" />
                   </Link>
-                  <div className="relative group">
-                    <button className="flex items-center space-x-2">
+                  <div className="relative">
+                    <button 
+                      ref={profileButtonRef}
+                      className="flex items-center space-x-2"
+                      onMouseEnter={() => setIsProfileMenuOpen(true)}
+                    >
                       <User className="h-6 w-6" />
                       <ChevronDown className="h-4 w-4 hidden sm:block" />
                     </button>
-                    <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 hidden group-hover:block">
+                    <AnimatePresence>
+                      {isProfileMenuOpen && (
+                        <motion.div 
+                          ref={profileMenuRef}
+                          initial={{ opacity: 0, y: 5 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 5 }}
+                          transition={{ duration: 0.15 }}
+                          className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50"
+                          onMouseEnter={() => setIsProfileMenuOpen(true)}
+                          onMouseLeave={() => setIsProfileMenuOpen(false)}
+                        >
                       <Link
                         to="/profile"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-brand-50"
@@ -158,7 +181,9 @@ const Header = () => {
                       >
                         Sign Out
                       </button>
-                    </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
                 </>
               ) : (
