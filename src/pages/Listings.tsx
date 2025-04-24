@@ -2,12 +2,14 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { MapPin, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle, Heart } from 'lucide-react';
 import ReactSlider from 'react-slider';
+import { useNavigate } from 'react-router-dom';
 import { getProductListings, ProductListing } from '../lib/api/productListings';
 import { addToFavorites, removeFromFavorites, isProductFavorited } from '../lib/api/favorites';
 import { useAuth } from '../contexts/AuthContext';
 
 const Listings = () => {
   const { user } = useAuth();
+  const navigate = useNavigate();
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [distance, setDistance] = useState(25);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
@@ -382,7 +384,10 @@ const Listings = () => {
                         </span>
                       )}
                     </div>
-                    <button className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                    <button 
+                      onClick={() => navigate(`/listings/${listing.id}`)}
+                      className="w-full bg-primary-500 hover:bg-primary-600 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+                    >
                       View Details
                     </button>
                   </div>

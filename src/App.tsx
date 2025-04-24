@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -8,6 +8,8 @@ import Auth from './pages/Auth';
 import Profile from './pages/Profile';
 import Listings from './pages/Listings';
 import CreateListing from './pages/listings/Create';
+import ProductDetails from './pages/ProductDetails';
+import TestApi from './pages/TestApi';
 import Categories from './pages/Categories';
 import Messages from './pages/Messages';
 import Favorites from './pages/Favorites';
@@ -28,12 +30,14 @@ function App() {
                 <Route path="/" element={<Home />} />
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/profile" element={<Profile />} />
-                <Route path="/listings" element={<Listings />} />
                 <Route path="/listings/create" element={<CreateListing />} />
+                <Route path="/listings/:id" element={<ProductDetails />} />
+                <Route path="/listings" element={<Listings />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/messages" element={<Messages />} />
                 <Route path="/favorites" element={<Favorites />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
+                <Route path="/test-api" element={<TestApi />} />
               </Routes>
             </main>
             <Toaster 
