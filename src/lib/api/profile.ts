@@ -99,7 +99,7 @@ export const updateProfile = async (updates: Partial<UserProfile>): Promise<User
     }
 
     // Prepare the profile data
-    const profileData = {
+    const profileData: Partial<UserProfile> = {
       id: user.id,
       email: user.email,
       ...filteredUpdates,
