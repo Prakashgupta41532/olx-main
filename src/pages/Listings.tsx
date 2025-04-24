@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle } from 'lucide-react';
+import { MapPin, Search, SlidersHorizontal, ChevronDown, Tag, Clock, CheckCircle, Heart } from 'lucide-react';
 import ReactSlider from 'react-slider';
-import { getProductListings, ProductListing, 
-  // updateProductListing
- } from '../lib/api/productListings';
+import { getProductListings, ProductListing } from '../lib/api/productListings';
+import { addToFavorites, removeFromFavorites, isProductFavorited } from '../lib/api/favorites';
+import { useAuth } from '../contexts/AuthContext';
 
 const Listings = () => {
+  const { user } = useAuth();
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const [distance, setDistance] = useState(25);
   const [selectedCategory, setSelectedCategory] = useState('All Categories');
@@ -16,6 +17,7 @@ const Listings = () => {
   const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [filtersVisible, setFiltersVisible] = useState(false);
+  const [favoriteStatus, setFavoriteStatus] = useState<{[key: string]: boolean}>({});
 
   const categories = [
     'All Categories',
@@ -115,6 +117,28 @@ const Listings = () => {
     return () => clearTimeout(timeoutId);
   }, [selectedCategory, sortBy, priceRange, searchQuery, distance]);
 
+  // Check favorite status for all listings when they change or user changes
+  useEffect(() => {
+    if (user && listings.length > 0) {
+      const checkFavorites = async () => {
+        const newStatus: {[key: string]: boolean} = {};
+        
+        for (const listing of listings) {
+          try {
+            const isFavorite = await isProductFavorited(listing.id);
+            newStatus[listing.id] = isFavorite;
+          } catch (err) {
+            console.error('Error checking favorite status:', err);
+          }
+        }
+        
+        setFavoriteStatus(newStatus);
+      };
+      
+      checkFavorites();
+    }
+  }, [listings, user]);
+
   // Filter function for client-side filtering
   const filterListings = (listings: ProductListing[]) => {
     return listings.filter(listing => {
@@ -151,6 +175,35 @@ const Listings = () => {
 
   const toggleFilters = () => {
     setFiltersVisible(!filtersVisible);
+  };
+
+  const toggleFavorite = async (listingId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    
+    if (!user) {
+      // Redirect to auth page if not logged in
+      window.location.href = '/auth';
+      return;
+    }
+    
+    try {
+      if (favoriteStatus[listingId]) {
+        await removeFromFavorites(listingId);
+        setFavoriteStatus(prev => ({
+          ...prev,
+          [listingId]: false
+        }));
+      } else {
+        await addToFavorites(listingId);
+        setFavoriteStatus(prev => ({
+          ...prev,
+          [listingId]: true
+        }));
+      }
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
   };
 
   return (
@@ -296,6 +349,12 @@ const Listings = () => {
                         Verified
                       </div>
                     )}
+                    <button
+                      onClick={(e) => toggleFavorite(listing.id, e)}
+                      className={`absolute top-2 left-2 p-2 rounded-full ${favoriteStatus[listing.id] ? 'bg-red-500 text-white' : 'bg-white/80 text-gray-700 hover:bg-white'} transition-colors`}
+                    >
+                      <Heart className={`h-4 w-4 ${favoriteStatus[listing.id] ? 'fill-white' : ''}`} />
+                    </button>
                   </div>
                   <div className="p-4">
                     <div className="flex justify-between items-start mb-2">

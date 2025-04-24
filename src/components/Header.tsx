@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Menu, Search, MessageCircle, User, ChevronDown, Bell, X,
   Car, Home, Smartphone, Briefcase, Bike, Tv, Truck, Sofa, Shirt, Book, Dog,
-  Plus, Store
+  Plus, Store, Heart
 } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -130,6 +130,9 @@ const Header = () => {
 
               {user ? (
                 <>
+                  <Link to="/favorites" className="hidden sm:block">
+                    <Heart className="h-6 w-6" />
+                  </Link>
                   <Link to="/messages" className="hidden sm:block">
                     <MessageCircle className="h-6 w-6" />
                   </Link>
@@ -235,6 +238,12 @@ const Header = () => {
                   className="block py-2 text-white/80 hover:text-white"
                 >
                   Orders
+                </Link>
+                <Link
+                  to="/favorites"
+                  className="block py-2 text-white/80 hover:text-white"
+                >
+                  Favorites
                 </Link>
                 <Link
                   to="/messages"

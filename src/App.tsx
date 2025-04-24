@@ -10,6 +10,7 @@ import Listings from './pages/Listings';
 import CreateListing from './pages/listings/Create';
 import Categories from './pages/Categories';
 import Messages from './pages/Messages';
+import Favorites from './pages/Favorites';
 import AdminDashboard from './pages/admin/Dashboard';
 import { AuthProvider } from './contexts/AuthContext';
 
@@ -31,6 +32,7 @@ function App() {
                 <Route path="/listings/create" element={<CreateListing />} />
                 <Route path="/categories" element={<Categories />} />
                 <Route path="/messages" element={<Messages />} />
+                <Route path="/favorites" element={<Favorites />} />
                 <Route path="/admin/*" element={<AdminDashboard />} />
               </Routes>
             </main>
